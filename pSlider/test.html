@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>pSlider test</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<script type="text/javascript" src="http://code.jquery.com/jquery-latest.min.js"></script>
+	<script type="text/javascript" src="jquery.pSlider.js"></script>
+	
+	<style type="text/css">
+	div#container { width: 1000px; height: 100px; margin: 0; padding: 0; overflow: hidden; border: 10px solid black; }
+	ul#slider { list-style-type: none; margin: 0; padding: 0; }
+	ul#slider li.item { display: inline-block; margin: 0; padding: 0; width: 100px; height: 100px; }
+	ul#slider li.item.red { background-color: red; width: 50px; }
+	ul#slider li.item.yellow { background-color: yellow; width: 150px; }
+	ul#slider li.item.green { background-color: green; width: 450px; }
+	ul#slider li.item.blue { background-color: blue; width: 250px; }
+	ul#slider li.item.magenta { background-color: magenta; width: 120px; }
+	ul#slider li.item.teal { background-color: teal; }
+	ul#slider li.item.cyan { background-color: cyan; }
+	ul#slider li.item.navy { background-color: navy; }
+	ul#slider li.item.gray { background-color: gray; }
+	ul#slider li.item.brown { background-color: brown; }
+	</style>
+	
+</head>
+
+<body>
+
+<div id="container">
+
+	<ul id="slider">
+		<li class="item red"></li>
+		<li class="item yellow"></li>
+		<li class="item green"></li>
+		<li class="item blue"></li>
+		<li class="item magenta"></li>
+		<li class="item cyan"></li>
+		<li class="item teal"></li>
+		<li class="item navy"></li>
+		<li class="item gray"></li>
+		<li class="item brown"></li>
+	</ul>
+
+</div>
+
+<a href="#" onclick="$('#slider').pSlider('next');return false;">next</a>
+<a href="#" onclick="$('#slider').pSlider('nextItem');return false;">next item</a>
+<a href="#" onclick="$('#slider').pSlider('nextBlock');return false;">next block</a>
+<a href="#" onclick="$('#slider').pSlider('nextPage');return false;">next page</a>
+&nbsp;||&nbsp;
+<a href="#" onclick="$('#slider').pSlider('prev');return false;">prev</a>
+<a href="#" onclick="$('#slider').pSlider('prevItem');return false;">prev item</a>
+<a href="#" onclick="$('#slider').pSlider('prevBlock');return false;">prev block</a>
+<a href="#" onclick="$('#slider').pSlider('prevPage');return false;">prev page</a>
+&nbsp;||&nbsp;
+<a href="#" onclick="$('#slider').pSlider('start');return false;">start slideshow</a>
+<a href="#" onclick="$('#slider').pSlider('stop');return false;">stop slideshow</a>
+&nbsp;||&nbsp;
+<a href="#" onclick="return false;" onmouseover="$('#slider').pSlider('start',{direction:'left'});" onmouseout="$('#slider').pSlider('stop');">slideshow left (hover)</a>
+<a href="#" onclick="return false;" onmouseover="$('#slider').pSlider('start',{direction:'right'});" onmouseout="$('#slider').pSlider('stop');">slideshow right (hover)</a>
+
+<script type="text/javascript">
+$(document).ready(function(){
+	var html = $('#slider').html();
+	html = html.trim().replace(/>\s+</g, '><');
+	$('#slider').empty().html(html);
+	
+	$('#slider').pSlider({
+		mode: 'smooth'
+		//mode:'item',
+		//amount: 3
+		});
+		
+	//$('#slider').trigger('start', {direction:'left'});
+});
+</script>
+
+</body>
+
+</html>
