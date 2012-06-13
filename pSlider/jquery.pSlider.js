@@ -1,7 +1,7 @@
 /**
  * pSlider v1.0 jQuery plugin
  * Copyright (c) 2012, Konstantin Vayner <poncha@gmx.net>
- * GitHub: https://github.com/poncha/jquery-plugins/pSlider
+ * GitHub: https://github.com/poncha/jquery-plugins/tree/master/pSlider
  */
 
 (function($){
@@ -34,13 +34,14 @@
 					items.each(function(){
 						var item_width = $( this ).outerWidth( true );
 						$(this).addClass('slider-item-original').addClass('slider-item-' + item_index);
+						//$(this).attr('title', 'width: ' + item_width + 'px');
 						//item_widths[item_index] = item_width;
 						items_width += item_width;
 						item_index++;
 					});
 					
-					// it should cover at least 2 containers width, and have at least 3 copies
-					var copies = Math.max(2, Math.floor(2 * container_width / items_width));
+					// it should cover at least 3 containers width, and have at least 2 copies
+					var copies = Math.max(2, Math.floor(3 * container_width / items_width));
 					
 					for(var copy=0; copy<copies; ++copy) {
 						var items_copy = items.clone();
@@ -154,6 +155,8 @@
 					cfg = $.extend({}, data.options, options);
 
 				if(cfg.debug) debug({method: 'scrollReal', options: options, cfg: cfg});
+
+				$this.stop();
 					
 				// scrollAmount is real scroll amount in pixels, amount may be in mode-specific units
 				var scrollAmount = cfg.scrollAmount !== undefined ? cfg.scrollAmount : cfg.amount;
@@ -248,6 +251,11 @@
 				var item, scrollMethod, scrollAmount;
 				
 				if(cfg.direction == 'right') {
+					var items_before = getFirstVisibleItem($this).prevAll();
+					// if no items before current, move 1 set of items to the left
+					if( items_before.length == 0 ) {
+						$this.css({ left: $this.position().left - data.itemsWidth });
+					}
 					item = getFirstVisibleItem($this).prev();
 					scrollAmount = offset - item.position().left;
 					scrollMethod = 'scrollRight';
@@ -312,13 +320,31 @@
 
 				if( cfg.mode == 'item' ) { // amount = number of items
 				
-					if(cfg.amount > data.itemsCount) cfg.amount = cfg.amount % data.itemsCount;
+					if(cfg.amount > data.itemsCount) {
+						cfg.amount = cfg.amount % data.itemsCount;
+						if(cfg.debug) debug("updated amount", {amount: cfg.amount});
+					}
 					
 					var offset = Math.abs($this.position().left);
 					var item, scrollMethod, scrollAmount;
 					
 					if( cfg.direction == 'right' ) {
-						item = getFirstVisibleItem($this).prevAll().slice(-1 * cfg.amount, -1 * cfg.amount + 1);
+						// get all items before current
+						var items_before = getFirstVisibleItem($this).prevAll();
+
+						// if not enough items before current, shift 1 set of items left
+						if( items_before.length < cfg.amount ) {
+							// shift slider
+							$this.css({ left: $this.position().left - data.itemsWidth });
+							// rescan items_before
+							items_before = getFirstVisibleItem($this).prevAll();
+							//recalculate slider offset
+							offset = Math.abs(offset - data.itemsWidth);
+						}
+
+						// get the target item
+						item = items_before.slice(cfg.amount -1, cfg.amount);
+
 						scrollAmount = offset - item.position().left;
 						scrollMethod = 'scrollRight';
 					}
@@ -377,7 +403,22 @@
 						scrollMethod = 'scrollLeft';
 					}
 					else {
-						item = getFirstVisibleItem($this).prevAll().slice(-1 * cfg.amount, -1 * cfg.amount + 1);
+						// get all items before current
+						var items_before = getFirstVisibleItem($this).prevAll();
+
+						// if not enough items before current, shift 1 set of items left
+						if( items_before.length < cfg.amount ) {
+							// shift slider
+							$this.css({ left: $this.position().left - data.itemsWidth });
+							// rescan items_before
+							items_before = getFirstVisibleItem($this).prevAll();
+							//recalculate slider offset
+							offset = Math.abs(offset - data.itemsWidth);
+						}
+
+						// get the target item
+						item = items_before.slice(cfg.amount -1, cfg.amount);
+
 						scrollAmount = offset - item.position().left;
 						scrollMethod = 'scrollRight';
 					}
@@ -410,14 +451,14 @@
 		
 		nextPage: function(options) {
 		
-			//debug({method: 'nextPage', options: options});
-		
 			return this.each(function(){
 			
 				var $this = $(this),
 					data = $this.data('pSlider'),
 					cfg = $.extend({}, data.options, options, {scrollAmount: data.containerWidth});
 				
+				if(cfg.debug) debug({method: 'nextPage', options: options, cfg: cfg});
+		
 				if( cfg.direction == 'right' )
 					$this.pSlider('scrollRight', cfg);
 				else
@@ -429,14 +470,14 @@
 	
 		prevPage: function(options) {
 		
-			//debug({method: 'prevPage', options: options});
-		
 			return this.each(function(){
 			
 				var $this = $(this),
 					data = $this.data('pSlider'),
 					cfg = $.extend({}, data.options, options, {scrollAmount: data.containerWidth});
 					
+				if(cfg.debug) debug({method: 'prevPage', options: options, cfg: cfg});
+		
 				if( cfg.direction == 'right' )
 					$this.pSlider('scrollLeft', cfg);
 				else
@@ -448,15 +489,13 @@
 
 		next: function(options) {
 		
-			//debug({method: 'next', options: options});
-		
 			return this.each(function(){
 			
 				var $this = $(this),
 					data = $this.data('pSlider'),
 					cfg = $.extend({}, data.options, options);
 					
-				//debug({method: 'next', mode: cfg.mode});
+				if(cfg.debug) debug({method: 'next', options: options, cfg: cfg});
 				
 				switch( cfg.mode )
 				{
@@ -481,15 +520,13 @@
 		
 		prev: function(options) {
 		
-			//debug({method: 'prev', options: options});
-		
 			return this.each(function(){
 			
 				var $this = $(this),
 					data = $this.data('pSlider'),
 					cfg = $.extend({}, data.options, options);
 					
-				//debug({method: 'prev', cfg: cfg});
+				if(cfg.debug) debug({method: 'prev', options: options, cfg: cfg});
 				
 				switch( cfg.mode )
 				{
@@ -546,9 +583,15 @@
 		
 			return this.each(function() {
 			
-				// remove slideshow configuration, this will stop slideshow on next tick
-				$(this).data('pSlider.slideShow', false).stop();
+				var $this = $(this),
+					timeout = $this.data('pSlider.slideShow.timeout');
 
+				// if timeout is waiting, lets clear it
+				if(timeout) window.clearTimeout(timeout);
+
+				$this.stop(); // stop animation
+				$this.data('pSlider.slideShow.timeout', false); // reset timeout ref
+				$this.data('pSlider.slideShow', false); // reset slideshow configuration
 			});
 		
 		}
@@ -572,7 +615,7 @@
 	handleEvent = function(event) {
 		$(event.target).pSlider(event.type, event.data);
 	};
-	
+
 	// perform slideshow (private)
 	slideShow = function(slider) {
 	
@@ -584,7 +627,10 @@
 		if( cfg ) {
 			
 			cfg.complete = function(){
-				window.setTimeout(function(){ slideShow(slider); }, cfg.delay);
+				var timeout = $this.data('pSlider.slideShow.timeout');
+				if(timeout) window.clearTimeout(timeout);
+				timeout = window.setTimeout(function(){ slideShow(slider); }, cfg.delay);
+				$this.data('pSlider.slideShow.timeout', timeout);
 			};
 			slider.pSlider('next', cfg);
 			
@@ -601,8 +647,8 @@
 			if( typeof(arg) == 'object' ) {
 				log += '{\n';
 				for(var key in arg) {
-					log += ' ' + k + ': ';
-					var val = arg[k];
+					log += ' ' + key + ': ';
+					var val = arg[key];
 					if(typeof(val) == 'object') {
 						log += '{\n';
 						for(var k in val) log += '  ' + k + ': ' + val[k] + '\n';
@@ -644,8 +690,8 @@
 	// defaults for each mode
 	$.fn.pSlider.mode_defaults = {
 		smooth: {
-			amount: 15, // pixels
-			delay: 50
+			amount: 1, // pixels
+			delay: 10
 		},
 		item: {
 			amount: 3, // number of items for nextBlock/prevBlock (nextItem/prevItem always scrolls single item, regardless of mode)
@@ -659,7 +705,7 @@
 		},
 		page: {
 			speed: 'fast', // transition speed (milliseconds or 'fast'/'slow')
-			delay: 1000 // delay between transitions in slideshow (milliseconds)
+			delay: 5000 // delay between transitions in slideshow (milliseconds)
 		}
 	};
 	
