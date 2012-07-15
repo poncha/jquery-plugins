@@ -31,6 +31,8 @@
 						//item_widths = [],
 						item_index = 0;
 
+					if(!items_count) return;
+
 					items.each(function(){
 						var item_width = $( this ).outerWidth( true );
 						$(this).addClass('slider-item-original').addClass('slider-item-' + item_index);
